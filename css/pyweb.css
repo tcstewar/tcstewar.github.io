@@ -1,0 +1,23 @@
+body {
+    padding: 0px;
+    margin: 0px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+div#toolbar {
+    background: lightsalmon;
+    margin: 0px;
+    padding: 0px;
+    flex: 0;
+}
+
+div#toolbar button {
+    margin: 0.5em;
+}
+
+div#content {
+    background: lavender;
+    flex: 1;
+}
