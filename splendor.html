@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/pyweb.css"/>
+    <link rel="stylesheet" href="splendor.css?4"/>
+    <script src="js/jquery-3.5.0.min.js"></script>
+    <script src="js/peerjs.min.js"></script>
+    <script src="js/peerstack.js?1"></script>
+    
+    <script type="text/javascript">
+      window.languagePluginUrl = 'pyodide/'
+    </script>  
+    <script src="pyodide/pyodide_dev.js"></script>
+  </head>
+  <body>
+    <script>
+        var peerstack = new PeerStack();
+        peerstack.metadata.seed = Math.floor(Math.random() * Math.pow(2, 32));
+        
+        function redraw() {
+            on_changed(peerstack.items, peerstack.metadata);
+        };
+        
+        function on_open() {
+            var url = new URL(window.location.href);
+            if (url.search) {
+                peerstack.connect_to(url.search.substr(1));
+            } else {
+                url.search = peerstack.peer.id;
+                redraw();
+            }
+            $('#peersync').append($('<a></a>').text("invite").prop('href', url.href).prop('target', '_blank'));
+        };
+    
+    
+    
+    
+      function reload() {
+        $.get({url: 'splendor.py', cache:false}).then((code) => {
+            pyodide.runPython(code);
+            on_changed = pyodide.pyimport('on_changed');
+                 
+            peerstack.on('added', redraw)
+                     .on('changed', redraw)
+                     .on('open', on_open)
+                     .init();
+            redraw();
+        });
+      }
+      languagePluginLoader.then(reload);
+      
+      function query(x) {
+          return $(x);
+      }      
+      
+      
+
+
+    </script>
+    
+    <div id="toolbar">
+        <a id="peersync" href="" target="_blank" disabled="true"></a>
+    </div>    
+    <div id="content">
+        <div id="board">
+            
+            
+        </div>
+        <div id="board_text"></div>
+        <div id="actions"></div>
+        <button id="btn_undo" type="button" onclick='peerstack.undo();'>Undo</button>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,161 @@
+div#content {
+    display: flex;
+    flex-direction: column; 
+}
+
+
+div#board {
+    background: slategray;
+    flex: 1;
+
+    --card_spacing_x: 0.15;
+    --card_spacing_y: 0.14;
+    --card_width: min(calc(100vw * var(--card_spacing_x)), 
+                      calc(71.4vh * var(--card_spacing_y)));
+    --card_height: min(calc(140vw * var(--card_spacing_x)), 
+                       calc(100vh * var(--card_spacing_y)));
+    --chip_size: calc(var(--card_width) * 0.8);
+    --point_color: gold;
+    
+    --r_color: crimson;
+    --g_color: darkgreen;
+    --b_color: mediumblue;
+    --w_color: aliceblue;
+    --k_color: darkslategray;
+}
+
+    
+
+div.chip {
+    width:var(--chip_size);
+    height:var(--chip_size);
+    border-radius: calc(var(--chip_size) * 0.5);
+    text-align: center;
+    line-height: var(--chip_size);
+    font-size: calc(var(--chip_size) * 0.8);    
+    
+    position: absolute;
+    border: 1px solid darkgray;
+    z-index: 1000;
+}
+
+div.empty {
+    opacity: 0.2;
+}
+
+div.action {
+    box-shadow: 0px 0px 10px white; 
+}
+div.action:hover {
+    box-shadow: 0px 0px 20px white; 
+}
+
+div.card {
+    width:var(--card_width);
+    height:var(--card_height);
+    
+    position: absolute;
+    border: 1px solid darkgray;
+}
+
+div.card.reserve {
+    transform: rotate(-90deg);
+}
+
+div.r {
+    background: var(--r_color);
+}
+
+div.g {
+    background: var(--g_color);
+}
+
+div.b {
+    background: var(--b_color);
+}
+
+div.w {
+    background: var(--w_color);
+}
+
+div.k {
+    background: var(--k_color);
+}
+
+div.x {
+    background: var(--point_color);
+}
+
+
+div.facedown {
+    background: tan;
+    text-align: center;
+    line-height: var(--card_height);
+    font-size: var(--card_width);
+    color: white;
+}
+
+div.facedown.level1::after {
+    content: "1";
+}
+
+div.facedown.level2::after {
+    content: "2";
+}
+
+div.facedown.level3::after {
+    content: "3";
+}
+
+div.points {
+    font-size: calc(var(--card_width) * 0.3);
+    font-weight: bold;
+    color: var(--point_color);
+    position: absolute;
+    top: calc(var(--card_height) * 0.03);
+    left: calc(var(--card_height) * 0.05);
+}
+
+div.facedown div.points {
+    display:none;
+}
+
+div.facedown div.cost {
+    display:none;
+}
+
+
+div.cost {
+    background: slategray;
+    position: absolute;
+    right: 5%;
+    bottom: 5%;
+    font-size: calc(var(--card_width) * 0.2);
+    border-radius: calc(var(--card_width) * 0.1);   
+    padding-left: 5%;
+    padding-right: 5%
+}
+
+div.cost_r::after {
+    color: var(--r_color);
+    content: "♥";
+}
+div.cost_g::after {
+    color: var(--g_color);
+    content: "♣";
+}
+div.cost_b::after {
+    color: var(--b_color);
+    content: "★";
+}
+div.cost_w::after {
+    color: var(--w_color);
+    content: "♦";
+}
+div.cost_k::after {
+    color: var(--k_color);
+    content: "♠";
+}
+
+
+    
