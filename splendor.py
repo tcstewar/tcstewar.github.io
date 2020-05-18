@@ -408,6 +408,14 @@ def text_card(card):
 
     return '[%s%s](%s)' % (card.bonus, points, ':'.join(cost))
     
+def code_noble(noble):
+    code = 'n-'
+    for c in 'kwrgb':
+        v = getattr(noble, c)
+        if v > 0:
+            code += c * v
+    return code
+
 def code_card(card):
     code = '%s%d-' % (card.bonus, card.points)
     for c in 'kwrgb':
@@ -489,7 +497,7 @@ def update(animate=True):
         reserve = False
         if c in game.levels[c.level]:
             pos_top = {1:50,2:35,3:20}[c.level]
-            pos_left = 2.5
+            pos_left = -10
             facedown = True
         elif c in game.tableau[c.level]:
             index = game.tableau[c.level].index(c)
@@ -538,6 +546,37 @@ def update(animate=True):
             card.addClass('reserve')
         else:
             card.removeClass('reserve')
+    
+    
+    for n in generate_nobles():
+        id = code_noble(n)
+        noble = q('#%s' % id)
+        left = -10
+        top = 50
+        z = 10000
+        if game.started:
+            if n in game.nobles:
+                index = game.nobles.index(n)
+                spacing = 50 / (game.n_players + 1)
+                top = 20 + spacing*index
+                left = 2.5
+            else:
+                for i, player in enumerate(game.players):
+                    if n in player.nobles:
+                        top, left = calc_item_position(player=i, color='*')
+                        index = player.nobles.index(n)
+                        top += index*6
+                        z += index
+                    
+        if animate:
+            now_top = noble.prop('style')['top']
+            now_left = noble.prop('style')['left']
+            pos_top = '%g%%'%top
+            pos_left = '%g%%'%left
+            if pos_top != now_top or pos_left != now_left:
+                noble.animate({'top':pos_top, 'left':pos_left, 'z-index':z}, 500)
+        else:
+            noble.prop('style', 'top:%g%%; left:%g%%; z-index:%d;' % (top, left, z))
         
             
     for k, v in game.chips.items():
@@ -558,9 +597,6 @@ def update(animate=True):
                 else:
                     chip.removeClass("empty")
                   
-
-    txt = text_game_state(game)
-    q('#board_text').html('<pre>%s</pre>'%txt)
 
     q('.chip').removeClass("action")
     q('.chip').attr("onclick", "")
@@ -613,6 +649,20 @@ def initialize_ui():
         top = 20 + i*7
         coin = q('<div id="chip-%s" class="chip %s empty" style="top:%g%%; left:85%%">0</div>' % (c, c, top))
         board.append(coin)
+    
+    for n in generate_nobles():
+        id = code_noble(n)
+        noble = q('<div></div>')
+        noble.prop('id', id)
+        noble.prop('class', 'noble x')
+        noble.prop('style', 'top:50%; left:-10%; z-index:0;')
+        for cc in colors:
+            v = getattr(n, cc)
+            if v > 0:
+                noble.append('<div class="cost_%s">%d</div>' % (cc, v))
+        
+        board.append(noble)
+     
      
 initialized_players = None     
 def init_game_ui():
@@ -641,16 +691,19 @@ def init_game_ui():
 def calc_item_position(player, color):
     if player == window.peerstack.index:
         top = 65
-        index = (colors+'x').index(color)
-        left = 14 + index*12
-    else:
+        index = ('*'+colors+'x').index(color)
+        left = 2 + index*12
+    elif game.n_players > 1:
         width = 100 / (game.n_players - 1)
         top_index = player
         if window.peerstack.index < player:
             top_index -= 1
         top = 0
-        index = (colors+'x').index(color)
-        left = (14 + index*12) * width / 100 + top_index * width
+        index = ('*'+colors+'x').index(color)
+        left = (2 + index*12) * width / 100 + top_index * width
+    else:
+        top = -10
+        left = -10
     return top, left
 initialize_ui()
 

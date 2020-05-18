@@ -5,21 +5,23 @@ class PeerStack {
         this.index = 0;
     }
     
-    init() { 
+    init(args) { 
         self = this;
         this.clients = [];
-        this.peer = new Peer();
+        this.peer = new Peer(args.id);            
         this.peer.on('open', () => {$(self).trigger('open');});
         this.peer.on('connection', (conn) => {self.on_connect_from_client(conn);});
-        this.peer.on('error', () => {console.log('error');});
         this.is_host = true;  
         this.is_connecting = false;        
         return this;
     }
-        
+    
     connect_to(host) {
         self = this;
         this.is_connecting = true;
+        this.peer.on('error', () => {self.is_connecting = false;
+                                     $(self).trigger('error_connect_to');});
+        
         this.conn = this.peer.connect(host, {reliable:true});
         this.conn.on('open', () => {self.on_connect_to_host();});
         this.conn.on('error', () => {console.log('error');});
@@ -55,7 +57,9 @@ class PeerStack {
         } else if (data.type == 'all') {
             this.metadata = data.metadata;
             this.items = data.value;
-            this.index = data.index;
+            if (data.index !== undefined) {
+                this.index = data.index;
+            }
             $(this).trigger('changed');
         } else if (data.type == 'undo') {
             this.undo();

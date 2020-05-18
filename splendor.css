@@ -39,6 +39,21 @@ div.chip {
     z-index: 1000;
 }
 
+div.noble {
+    width:var(--chip_size);
+    height:var(--chip_size);
+    border-radius: calc(var(--chip_size) * 0.1);
+    text-align: center;
+    line-height: calc(var(--chip_size) * 0.35);
+    font-size: calc(var(--chip_size) * 0.35);    
+    
+    position: absolute;
+    border: 1px solid darkgray;
+    z-index: 1000;
+}
+
+
+
 div.empty {
     opacity: 0.2;
 }

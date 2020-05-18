@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/pyweb.css"/>
-    <link rel="stylesheet" href="splendor.css?4"/>
+    <link rel="stylesheet" href="splendor.css?6"/>
     <script src="js/jquery-3.5.0.min.js"></script>
     <script src="js/peerjs.min.js"></script>
-    <script src="js/peerstack.js?1"></script>
+    <script src="js/peerstack.js?2"></script>
     
     <script type="text/javascript">
       window.languagePluginUrl = 'pyodide/'
@@ -25,12 +25,17 @@
         function on_open() {
             var url = new URL(window.location.href);
             if (url.search) {
+                peerstack.on('error_connect_to', () => {                    
+                        console.log('did not connect');
+                        peerstack.init({id:url.search.substr(1)});
+                    });
                 peerstack.connect_to(url.search.substr(1));
             } else {
                 url.search = peerstack.peer.id;
+                window.history.pushState({}, '', url.href);
                 redraw();
             }
-            $('#peersync').append($('<a></a>').text("invite").prop('href', url.href).prop('target', '_blank'));
+            //$('#peersync').append($('<a></a>').text("invite").prop('href', url.href).prop('target', '_blank'));
         };
     
     
@@ -44,7 +49,7 @@
             peerstack.on('added', redraw)
                      .on('changed', redraw)
                      .on('open', on_open)
-                     .init();
+                     .init({});
             redraw();
         });
       }
@@ -59,15 +64,9 @@
 
     </script>
     
-    <div id="toolbar">
-        <a id="peersync" href="" target="_blank" disabled="true"></a>
-    </div>    
     <div id="content">
         <div id="board">
-            
-            
         </div>
-        <div id="board_text"></div>
         <div id="actions"></div>
         <button id="btn_undo" type="button" onclick='peerstack.undo();'>Undo</button>
     </div>
