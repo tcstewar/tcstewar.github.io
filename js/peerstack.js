@@ -8,7 +8,7 @@ class PeerStack {
     init(args) { 
         self = this;
         this.clients = [];
-        this.peer = new Peer(args.id, {host: '9000-ea4638ca-b39e-4a86-bc0b-050253b394b5.ws-us02.gitpod.io'});            
+        this.peer = new Peer(args.id);            
         this.peer.on('open', () => {$(self).trigger('open');});
         this.peer.on('connection', (conn) => {self.on_connect_from_client(conn);});
         this.is_host = true;  
