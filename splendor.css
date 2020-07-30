@@ -5,7 +5,7 @@ div#content {
 
 
 div#board {
-    background: slategray;
+    background: #708090a3;
     flex: 1;
 
     --card_spacing_x: 0.15;
@@ -17,11 +17,11 @@ div#board {
     --chip_size: calc(var(--card_width) * 0.8);
     --point_color: gold;
     
-    --r_color: crimson;
-    --g_color: darkgreen;
-    --b_color: mediumblue;
+    --r_color: #d12c0aa3;
+    --g_color: #247902;
+    --b_color: #0000cdb8;
     --w_color: aliceblue;
-    --k_color: darkslategray;
+    --k_color: #795548;
 }
 
     
