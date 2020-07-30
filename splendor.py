@@ -79,6 +79,7 @@ class Player(object):
         self.points = 0
         self.drawn_this_turn = []
         self.reserving = False
+        self.must_discard = False
 
     def can_reserve_card(self, card):
         if self.game.players[self.game.current_player] is not self:
@@ -174,7 +175,11 @@ class Player(object):
     def valid_actions(self):
         actions = []
         
-        if self.reserving:
+        if self.must_discard:
+            for c in colors + 'x':
+                if self.chips[c] > 0:
+                    actions.append((self.return_chip, dict(color=c)))
+        elif self.reserving:
             for level in [3, 2, 1]:
                 for card in self.game.tableau[level]:
                     if card is not None:
@@ -233,6 +238,16 @@ class Player(object):
             self.game.end_turn()
         if sum([self.can_draw(c) for c in colors]) == 0:
             self.game.end_turn()
+            
+    def has_too_many(self):
+        return sum(self.chips.values()) > 10
+        
+    def return_chip(self, color):
+        if self.chips[color] > 0:
+            self.chips[color] -= 1
+            self.game.chips[color] +=1
+        self.game.end_turn()
+            
 
 class Splendor(object):
     def __init__(self, seed):
@@ -305,9 +320,14 @@ class Splendor(object):
             self.end_turn(reset_pass=False)
 
     def end_turn(self, reset_pass=True):
+        if self.players[self.current_player].has_too_many():
+            self.players[self.current_player].must_discard = True
+            return
+        self.players[self.current_player].must_discard = False
+        
         if reset_pass:
             self.pass_count = 0
-        del self.players[self.current_player].drawn_this_turn[:]
+        del self.players[self.current_player].drawn_this_turn[:]            
         self.current_player = ((self.current_player + 1) % len(self.players))
         if self.end_game and self.current_player == self.first_player:
             max_points = max([p.points for p in self.players])
@@ -459,6 +479,8 @@ def code_action(func, args):
         return 'remove'
     elif name == 'start':
         return 'start'
+    elif name == 'return_chip':
+        return 'return:%s' % args['color']
     else:
         return 'unknown:%r %r' % (name, args)
         
@@ -471,6 +493,8 @@ def ui_action(func, args):
         obj = q('#%s' % code_card(args['card']))
     elif name == 'reserve_card':
         obj = q('#%s' % code_card(args['card']))
+    elif name == 'return_chip':
+        obj = q('#chip-%d-%s' % (window.peerstack.index, args['color']))
     else:
         return False
     obj.attr('onclick', cmd)
