@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/pyweb.css"/>
-    <link rel="stylesheet" href="splendor.css?6"/>
+    <link rel="stylesheet" href="splendor.css?7"/>
     <script src="js/jquery-3.5.0.min.js"></script>
     <script src="js/peerjs.min.js"></script>
-    <script src="js/peerstack.js?2"></script>
+    <script src="js/peerstack.js?20"></script>
     
     <script type="text/javascript">
       window.languagePluginUrl = 'pyodide/'
@@ -18,6 +18,14 @@
         var peerstack = new PeerStack();
         peerstack.metadata.seed = Math.floor(Math.random() * Math.pow(2, 32));
         
+        function update_status() {
+            if (peerstack.is_connecting) {
+                $('#status').text('Connecting...');
+            } else {
+                $('#status').text('Clients: '+peerstack.clients);
+            }
+        }
+        
         function redraw() {
             on_changed(peerstack.items, peerstack.metadata);
         };
@@ -25,8 +33,7 @@
         function on_open() {
             var url = new URL(window.location.href);
             if (url.search) {
-                peerstack.on('error_connect_to', () => {                    
-                        console.log('did not connect');
+                peerstack.on('error_connect_to', () => { 
                         peerstack.init({id:url.search.substr(1)});
                     });
                 peerstack.connect_to(url.search.substr(1));
@@ -35,16 +42,21 @@
                 window.history.pushState({}, '', url.href);
                 redraw();
             }
-            //$('#peersync').append($('<a></a>').text("invite").prop('href', url.href).prop('target', '_blank'));
         };
-    
-    
+        
+        
+      function restart() {
+         metadata = {seed:Math.floor(Math.random() * Math.pow(2, 32))};
+         peerstack.restart(metadata);
+      }
     
     
       function reload() {
         $.get({url: 'splendor.py', cache:false}).then((code) => {
             pyodide.runPython(code);
             on_changed = pyodide.pyimport('on_changed');
+            change_player_index = pyodide.pyimport('change_player_index');
+            get_player_index = pyodide.pyimport('get_player_index');
                  
             peerstack.on('added', redraw)
                      .on('changed', redraw)
@@ -63,6 +75,8 @@
 
 
     </script>
+    
+    <div id="status"></div>
     
     <div id="content">
         <div id="board">

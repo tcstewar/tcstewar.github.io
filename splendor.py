@@ -134,7 +134,7 @@ class Player(object):
         self.bonus[card.bonus] += 1
         self.points += card.points
         self.check_nobles()
-        if self.points >= 15:
+        if self.points >= 1:
             self.game.end_game = True
         self.game.end_turn()
 
@@ -494,7 +494,7 @@ def ui_action(func, args):
     elif name == 'reserve_card':
         obj = q('#%s' % code_card(args['card']))
     elif name == 'return_chip':
-        obj = q('#chip-%d-%s' % (window.peerstack.index, args['color']))
+        obj = q('#chip-%d-%s' % (player_index, args['color']))
     else:
         return False
     obj.attr('onclick', cmd)
@@ -627,26 +627,56 @@ def update(animate=True):
     q('.card').removeClass("action")
     q('.card').attr("onclick", "")
     
+    if game.started:
+        scores = ' '.join(['%d'%p.points for p in game.players])
+        scores = 'Scores: %s' % scores
+    else: 
+        scores = ''
+    
+    if game.started and game.current_player == None:
+        q('#actions').html('%s<br></br>Game over! <button onclick="restart();">Restart</button>'%scores)
+        return
+    
     actions = game.valid_actions()
     html = []
-    if game.current_player == window.peerstack.index or not game.started:
+    if game.current_player == player_index or not game.started:
         for a in actions:
             handled = ui_action(*a)
             if not handled:
                 html.append(html_action(*a))
     if len(html) > 0:
-        q('#actions').html('<ul>%s</ul>'%''.join(html))
+        q('#actions').html('%s<ul>%s</ul>'%(scores, ''.join(html)))
     else:
-        q('#actions').html('')
+        q('#actions').html(scores)
+    
+    
+initialized_players = None     
+player_index = 0
     
     
 def on_changed(items, metadata):
     global game
+    global player_index
+    print('on_changed')
+    print(player_index, window.peerstack.index)
+    force = False
+    if player_index == 0 and not window.peerstack.is_host:
+        player_index = window.peerstack.index
+        force = True
     game = Splendor(seed=metadata['seed'])
     for item in items:
         act(item)
-    init_game_ui()
+    init_game_ui(force=force)
     update(animate=game.started)
+    
+def change_player_index(index):
+    global player_index
+    player_index = index
+    init_game_ui(force=True)
+    update(animate=True)
+
+def get_player_index():
+    return player_index
     
     
     
@@ -688,11 +718,11 @@ def initialize_ui():
         board.append(noble)
      
      
-initialized_players = None     
-def init_game_ui():
+
+def init_game_ui(force=False):
 
     global initialized_players
-    if initialized_players == game.n_players and game.started:
+    if initialized_players == game.n_players and game.started and not force:
         return
     
     board = q('#board')
@@ -713,21 +743,24 @@ def init_game_ui():
         
         
 def calc_item_position(player, color):
-    if player == window.peerstack.index:
+    if player == player_index:
         top = 65
         index = ('*'+colors+'x').index(color)
         left = 2 + index*12
-    elif game.n_players > 1:
-        width = 100 / (game.n_players - 1)
+    else:
+        n_others = game.n_players
+        if player_index < game.n_players:
+            n_others -= 1
+        if n_others == 0:
+            n_others = 1   # this should not happen
+            console.log('calc_item_position called for n_others=0')
+        width = 100 / (n_others)
         top_index = player
-        if window.peerstack.index < player:
+        if player_index < player:
             top_index -= 1
         top = 0
         index = ('*'+colors+'x').index(color)
         left = (2 + index*12) * width / 100 + top_index * width
-    else:
-        top = -10
-        left = -10
     return top, left
 initialize_ui()
 
