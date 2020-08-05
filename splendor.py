@@ -134,7 +134,7 @@ class Player(object):
         self.bonus[card.bonus] += 1
         self.points += card.points
         self.check_nobles()
-        if self.points >= 1:
+        if self.points >= 15:
             self.game.end_game = True
         self.game.end_turn()
 
