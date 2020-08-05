@@ -632,6 +632,17 @@ def update(animate=True):
         scores = 'Scores: %s' % scores
     else: 
         scores = ''
+        
+    player = 'You are player'
+    n_options = max(game.n_players + 1, player_index)
+    options = []
+    for i in range(n_options):
+        sel = ' selected="selected"' if i==player_index else ''
+        obs = ' (observer)' if i >= game.n_players else ''
+        option = '<option value="%d"%s>%d%s</option>'% (i, sel, i+1, obs)
+        options.append(option)
+    selection = '<select onchange="change_player_index(parseInt(this.value));">%s</select>' % ''.join(options) 
+    scores = '%s %s %s' % (scores, player, selection)
     
     if game.started and game.current_player == None:
         q('#actions').html('%s<br></br>Game over! <button onclick="restart();">Restart</button>'%scores)
